@@ -1,0 +1,79 @@
+packaging_format = 2
+
+id = "docker_swarm"
+name = "Docker Swarm template"
+description.en = "Deploy an app with Docker Swarm"
+description.fr = "Déployez une application grâce à Docker Swarm"
+
+version = "1.0~ynh1"
+
+maintainers = ["pbrisacier@mncc.fr"]
+
+[upstream]
+# NB: Only the "license" key is mandatory. Remove entries for which there's no relevant data
+license = "apache-2.0"
+website = "https://www.docker.com/"
+userdoc = "https://docs.docker.com/engine/swarm/"
+code = "https://github.com/docker/engine"
+
+[integration]
+yunohost = ">= 11.1.21"
+architectures = "all"
+multi_instance = true
+ldap = false
+sso = false
+disk = "300M"
+ram.build = "100M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    # this is a generic question - ask strings are automatically handled by YunoHost's core
+    type = "domain"
+
+    [install.path]
+    # this is a generic question - ask strings are automatically handled by YunoHost's core
+    type = "path"
+    default = "/mydockerapp"
+
+    [install.init_main_permission]
+    # this is a generic question - ask strings are automatically handled by YunoHost's core
+    # This won't be saved as setting and will instead be used to initialize the SSOwat permission
+    type = "group"
+    default = "admins"
+
+[resources]
+    # See the packaging documentation for the full set
+    # of explanation regarding the behavior and properties for each of those
+
+    [resources.system_user]
+    # This will provision/deprovision a unix system user
+
+    [resources.install_dir]
+    # This will create/remove the install dir as /var/www/$app
+    # and store the corresponding setting $install_dir
+
+    [resources.data_dir]
+    # This will create/remove the data dir as /home/yunohost.app/$app
+    # and store the corresponding setting $data_dir
+    subdirs = ["data"]
+
+    [resources.permissions]
+    # This will configure SSOwat permission for $domain/$path/
+    # The initial allowed group of user is configured via the init_main_permission question (public=visitors, private=all_users)
+    main.url = "/"
+
+    [resources.ports]
+    # This will pick a random port for reverse-proxying and store it as the $port setting
+
+    [resources.apt]
+    # This will automatically install/uninstall the following apt packages
+    # and implicitly define the $phpversion setting as 8.0 (if phpX.Y-foobar dependencies are listed)
+    packages = ["ca-certificates", "curl", "gnupg"]
+    extras.docker.repo = "deb https://download.docker.com/linux/debian bullseye stable"
+    extras.docker.key = "https://download.docker.com/linux/debian/gpg"
+    extras.docker.packages = ["docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"]
+
+    [resources.database]
+    # This will automatically provision/deprovison a MySQL DB and store the corresponding credentials in settings $db_user, $db_name, $db_pwd
+    type = "mysql"

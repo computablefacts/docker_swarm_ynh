@@ -1,0 +1,69 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+
+# Docker must be in Swarm mode
+if [[ "$(docker info --format '{{.Swarm.LocalNodeState}}')" == "inactive" ]]; then
+    docker swarm init --advertise-addr lo
+fi
+
+# Create a dedicated NGINX config using the conf/nginx.conf template
+ynh_add_nginx_config
+
+# Create a dedicated systemd config
+ynh_add_systemd_config
+
+yunohost service add $app --description="$app" --log="/var/log/$app/$app.log" --test_status "docker stack ls | grep $app"
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# APP INITIAL CONFIGURATION
+#=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding the Docker Swarm file..." --weight=1
+
+ynh_add_config --template="stack.yaml" --destination="$data_dir/stack.yaml"
+ynh_add_config --template=".env" --destination="$data_dir/.env"
+
+
+ynh_script_progression --message="Allow Docker containers to access MariaDB database..." --weight=1
+# MySQL (MariaDB) should be accessible from all IP
+ynh_add_config --template="mysql.cnf" --destination="/etc/mysql/mariadb.conf.d/90-$app.cnf"
+chown root:root "/etc/mysql/mariadb.conf.d/90-$app.cnf"
+chmod 644 "/etc/mysql/mariadb.conf.d/90-$app.cnf"
+systemctl restart mariadb.service
+# Firewall should allow Docker containers internal IP to reach MySQL
+# Should be the same as ../hooks/post_iptable_rules
+iptables -A INPUT -p tcp --dport 3306 -s 172.17.0.0/12 -j ACCEPT
+iptables -A INPUT -p tcp --dport 3306 -s 192.168.0.0/16 -j ACCEPT
+# MySQL user should be allowed to connect from all hosts
+ynh_mysql_execute_as_root --sql="RENAME USER '$db_user'@'localhost' TO '$db_user'@'%'"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..." --weight=1
+
+ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression --message="Installation of $app completed" --last
