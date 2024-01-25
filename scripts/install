@@ -40,6 +40,23 @@ ynh_script_progression --message="Adding the Docker Swarm file..." --weight=1
 ynh_add_config --template="stack.yaml" --destination="$data_dir/stack.yaml"
 ynh_add_config --template=".env" --destination="$data_dir/.env"
 
+# Create directories for all volumes in the stack file
+# We use yq so we start by installing it if not already present. See: https://github.com/mikefarah/yq/#install
+if ! command -v "yq" > /dev/null 2>&1; then
+    wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+fi
+# Create a directory for each volume
+# Volume should be a subdirectory of data dir, if not we return an error
+for vol in $(yq '.services[].volumes[]' $data_dir/stack.yaml)
+do
+    if [[ "$vol" =~ ^\./(.*):(.*)$ ]]; then
+        mkdir -p "$data_dir/${BASH_REMATCH[1]}"
+        chown $app:$app "$data_dir/${BASH_REMATCH[1]}"
+    else
+        echo "Wrong volume directory ($vol). It should be a relative directory eg. ./my_volume"
+        exit 1
+    fi
+done
 
 ynh_script_progression --message="Allow Docker containers to access MariaDB database..." --weight=1
 # MySQL (MariaDB) should be accessible from all IP
