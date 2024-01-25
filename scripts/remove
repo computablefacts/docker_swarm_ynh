@@ -40,6 +40,7 @@ ynh_secure_remove --file="/etc/mysql/mariadb.conf.d/90-$app.cnf"
 systemctl restart mariadb.service
 # Firewall should NOT allow Docker containers internal IP to reach MySQL
 # Should be the OPPOSITE as ../hooks/post_iptable_rules
+iptables -D INPUT -s 10.0.0.0/8 -p tcp -m tcp --dport 3306 -j ACCEPT
 iptables -D INPUT -s 192.168.0.0/16 -p tcp -m tcp --dport 3306 -j ACCEPT
 iptables -D INPUT -s 172.16.0.0/12 -p tcp -m tcp --dport 3306 -j ACCEPT
 # MySQL user should be allowed to connect only from localhost
