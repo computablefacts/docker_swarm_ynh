@@ -5,3 +5,8 @@
 iptables -A INPUT -p tcp --dport 3306 -s 172.17.0.0/12 -j ACCEPT
 iptables -A INPUT -p tcp --dport 3306 -s 192.168.0.0/16 -j ACCEPT
 iptables -A INPUT -p tcp --dport 3306 -s 10.0.0.0/8 -j ACCEPT
+
+# This hook is called by YunoHost when reloading Firewall settings
+# It deletes all Docker rules so we restart Docker service to apply
+# its rules again
+systemctl restart docker.service
