@@ -107,7 +107,7 @@ fi
 # Volume should be a subdirectory of data dir, if not we return an error
 for vol in $(yq '.services[].volumes[]' $data_dir/stack.yaml)
 do
-    if [[ "$vol" =~ ^\./([]*):(.*)$ ]]; then
+    if [[ "$vol" =~ ^\./(.*):(.*)$ ]]; then
         volume_name=${BASH_REMATCH[1]}
         # If no dots, we consider the volume name is a directory
         if [[ "$volume_name" =~ ^([^.]*)$ ]]; then
