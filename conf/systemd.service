@@ -6,9 +6,9 @@ After=network.target
 Type=oneshot
 RemainAfterExit=true
 WorkingDirectory=__DATA_DIR__/
-ExecStart=/usr/bin/docker stack up --compose-file stack.yaml --prune __APP__
-ExecReload=/usr/bin/docker stack up --compose-file stack.yaml --prune __APP__
-ExecStop=/usr/bin/docker stack down __APP__
+ExecStart=/usr/bin/docker stack up --compose-file stack.yaml --detach=false --prune __APP__
+ExecReload=/usr/bin/docker stack up --compose-file stack.yaml --detach=false --prune __APP__
+ExecStop=/usr/bin/docker stack down --detach=false __APP__
 StandardOutput=append:/var/log/__APP__/__APP__.log
 StandardError=inherit
 
