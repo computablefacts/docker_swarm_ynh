@@ -80,24 +80,20 @@ if [[ "$(docker info --format '{{.Swarm.LocalNodeState}}')" == "inactive" ]]; th
     docker swarm init --advertise-addr lo
 fi
 
+# Create a dedicated NGINX config using the conf/nginx.conf template
 ynh_add_nginx_config
 
+# Create a dedicated systemd config
 ynh_add_systemd_config
+# Copy start and stop scripts for the service
+ynh_add_config --template="stack_start.sh" --destination="$install_dir/stack_start.sh"
+ynh_add_config --template="stack_stop.sh" --destination="$install_dir/stack_stop.sh"
+chmod +x "$install_dir/stack_start.sh"
+chmod +x "$install_dir/stack_stop.sh"
 
 yunohost service add $app --description="$app" --log="/var/log/$app/$app.log" --test_status "docker stack ls | grep $app"
 
 ynh_use_logrotate --non-append
-
-#=================================================
-# STOP SYSTEMD SERVICE
-#=================================================
-ynh_script_progression --message="Stopping a systemd service..." --weight=1
-
-ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
-
-# Wait for the stack to be fully detroyed
-# See: https://github.com/moby/moby/issues/30942#issuecomment-540699206
-until [[ -z $(docker stack ps $app -q) ]]; do sleep 1; done
 
 #=================================================
 # RECONFIGURE THE APP (UPDATE CONF, APPLY MIGRATIONS...)

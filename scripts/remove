@@ -31,8 +31,13 @@ ynh_remove_nginx_config
 
 ynh_remove_logrotate
 
-# Remove other various files specific to the app... such as :
+# Remove the stack
+docker stack rm $app
+# Wait for the stack to be fully detroyed
+# See: https://github.com/moby/moby/issues/30942#issuecomment-540699206
+until [[ -z $(docker stack ps $app -q) ]]; do sleep 1; done
 
+# Remove other various files specific to the app... such as :
 ynh_secure_remove --file="/var/log/$app"
 
 # Remove conf that put MySQL (MariaDB) accessible from all IP

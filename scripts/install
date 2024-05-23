@@ -24,6 +24,11 @@ ynh_add_nginx_config
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
+# Copy start and stop scripts for the service
+ynh_add_config --template="stack_start.sh" --destination="$install_dir/stack_start.sh"
+ynh_add_config --template="stack_stop.sh" --destination="$install_dir/stack_stop.sh"
+chmod +x "$install_dir/stack_start.sh"
+chmod +x "$install_dir/stack_stop.sh"
 
 yunohost service add $app --description="$app" --log="/var/log/$app/$app.log" --test_status "docker stack ls | grep $app"
 
