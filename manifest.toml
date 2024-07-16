@@ -1,7 +1,7 @@
 packaging_format = 2
 
 id = "docker_swarm"
-name = "Docker Swarm template"
+name = "Docker Swarm template (debug)"
 description.en = "Deploy an app with Docker Swarm"
 description.fr = "Déployez une application grâce à Docker Swarm"
 
