@@ -42,6 +42,10 @@ ram.runtime = "50M"
     type = "group"
     default = "admins"
 
+    [install.basic_auth]
+    type = "string"
+    default = "admin:password"
+
 [resources]
     # See the packaging documentation for the full set
     # of explanation regarding the behavior and properties for each of those
