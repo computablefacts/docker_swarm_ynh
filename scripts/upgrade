@@ -92,9 +92,9 @@ if [[ -z "$basic_auth" ]]; then
     rm -f /etc/nginx/conf.d/$domain.d/basic_auth.conf
 else
     # Créez un nouveau fichier htpasswd ou vider le fichier existant
-    echo '' > /etc/nginx/conf.d/$domain.d/htpasswd
+    echo -n '' > /etc/nginx/conf.d/$domain.d/htpasswd
 
-    # Traiter la chaîne basic_auth et ajouter chaque login:pwd au fichier .htpasswd
+    # Traiter la chaîne basic_auth et ajouter chaque login:pwd au fichier htpasswd
     IFS=',' read -r -a credentials <<< "$basic_auth"
     for credential in "${credentials[@]}"
     do
@@ -103,7 +103,7 @@ else
         password=${pair[1]}
         # Générer le mot de passe chiffré avec openssl
         encrypted_password=$(openssl passwd -apr1 "$password")
-        # Ajouter le login et le mot de passe chiffré au fichier .htpasswd
+        # Ajouter le login et le mot de passe chiffré au fichier htpasswd
         echo "$login:$encrypted_password" | sudo tee -a /etc/nginx/conf.d/$domain.d/htpasswd > /dev/null
     done
 
