@@ -84,7 +84,7 @@ fi
 ynh_add_nginx_config
 
 # Create the htpasswd file with the content of basic_auth
-basic_auth=$(ynh_app_setting_get --app=$app --key=basic_auth)
+basic_auth=$(ynh_app_setting_get --app="$app" --key='basic_auth')
 
 if [[ -z "$basic_auth" ]]; then
     # $basic_auth est vide
