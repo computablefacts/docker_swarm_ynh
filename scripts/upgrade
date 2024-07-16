@@ -83,6 +83,29 @@ fi
 # Create a dedicated NGINX config using the conf/nginx.conf template
 ynh_add_nginx_config
 
+# Create the htpasswd file with the content of basic_auth
+ynh_app_setting_set_default --app=$app --key=basic_auth --value=''
+basic_auth=$(ynh_app_setting_get --app=$app --key=basic_auth)
+
+# Créez le répertoire si nécessaire
+sudo mkdir -p /etc/nginx/conf.d/$domain.d
+
+# Créez un nouveau fichier htpasswd
+sudo touch /etc/nginx/conf.d/$domain.d/htpasswd
+
+# Traiter la chaîne basic_auth et ajouter chaque login:pwd au fichier .htpasswd
+IFS=',' read -r -a credentials <<< "$basic_auth"
+for credential in "${credentials[@]}"
+do
+    IFS=':' read -r -a pair <<< "$credential"
+    login=${pair[0]}
+    password=${pair[1]}
+    # Générer le mot de passe chiffré avec openssl
+    encrypted_password=$(openssl passwd -apr1 "$password")
+    # Ajouter le login et le mot de passe chiffré au fichier .htpasswd
+    echo "$login:$encrypted_password" | sudo tee -a /etc/nginx/conf.d/$domain.d/htpasswd > /dev/null
+done
+
 # Create a dedicated systemd config
 ynh_add_systemd_config
 # Copy start and stop scripts for the service
