@@ -84,7 +84,6 @@ fi
 ynh_add_nginx_config
 
 # Create the htpasswd file with the content of basic_auth
-ynh_app_setting_set_default --app=$app --key=basic_auth --value=''
 basic_auth=$(ynh_app_setting_get --app=$app --key=basic_auth)
 
 # Créez le répertoire si nécessaire
