@@ -44,7 +44,7 @@ ram.runtime = "50M"
 
     [install.basic_auth]
     type = "string"
-    default = "admin:password"
+    default = ""
 
 [resources]
     # See the packaging documentation for the full set
