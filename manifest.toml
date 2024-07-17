@@ -44,6 +44,7 @@ ram.runtime = "50M"
 
     [install.basic_auth]
     type = "string"
+    optional = true
     default = ""
 
 [resources]
