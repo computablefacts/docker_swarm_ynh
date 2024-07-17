@@ -101,8 +101,15 @@ else
         IFS=':' read -r -a pair <<< "$credential"
         login=${pair[0]}
         password=${pair[1]}
-        # Générer le mot de passe chiffré avec openssl
-        encrypted_password=$(openssl passwd -apr1 "$password")
+
+        # Vérifiez si le mot de passe est déjà chiffré
+        if [[ $password == \$apr1\$* ]]; then
+            encrypted_password=$password
+        else
+            # Générer le mot de passe chiffré avec openssl
+            encrypted_password=$(openssl passwd -apr1 "$password")
+        fi
+
         # Ajouter le login et le mot de passe chiffré au fichier htpasswd
         echo "$login:$encrypted_password" | sudo tee -a /etc/nginx/conf.d/$domain.d/htpasswd > /dev/null
     done

@@ -22,6 +22,40 @@ fi
 # Create a dedicated NGINX config using the conf/nginx.conf template
 ynh_add_nginx_config
 
+# Create the htpasswd file with the content of basic_auth
+if [[ -z "$basic_auth" ]]; then
+    # $basic_auth est vide
+    rm -f /etc/nginx/conf.d/$domain.d/htpasswd
+    rm -f /etc/nginx/conf.d/$domain.d/basic_auth.conf
+else
+    # Créez un nouveau fichier htpasswd ou vider le fichier existant
+    echo -n '' > /etc/nginx/conf.d/$domain.d/htpasswd
+
+    # Traiter la chaîne basic_auth et ajouter chaque login:pwd au fichier htpasswd
+    IFS=',' read -r -a credentials <<< "$basic_auth"
+    for credential in "${credentials[@]}"
+    do
+        IFS=':' read -r -a pair <<< "$credential"
+        login=${pair[0]}
+        password=${pair[1]}
+
+        # Vérifiez si le mot de passe est déjà chiffré
+        if [[ $password == \$apr1\$* ]]; then
+            encrypted_password=$password
+        else
+            # Générer le mot de passe chiffré avec openssl
+            encrypted_password=$(openssl passwd -apr1 "$password")
+        fi
+
+        # Ajouter le login et le mot de passe chiffré au fichier htpasswd
+        echo "$login:$encrypted_password" | sudo tee -a /etc/nginx/conf.d/$domain.d/htpasswd > /dev/null
+    done
+
+    # Ajouter la conf nginx pour utiliser htpasswd avec le Basic Auth
+    ynh_add_config --template="nginx.basic_auth.conf" --destination="/etc/nginx/conf.d/$domain.d/basic_auth.conf"
+fi
+ynh_systemd_action --service_name='nginx' --action='reload'
+
 # Create a dedicated systemd config
 ynh_add_systemd_config
 # Copy start and stop scripts for the service
