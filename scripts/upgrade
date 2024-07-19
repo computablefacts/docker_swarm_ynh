@@ -133,11 +133,11 @@ else
     for ip in "${ips[@]}"
     do
         # Ajouter l'IP au fichier allowed_ips.conf
-        echo "allow $ip" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
+        echo "allow $ip;" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
     done
 
     # Interdire toutes les autres IPs
-    echo "deny all" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
+    echo "deny all;" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
 fi
 
 # Recharger la conf de nginx (prise en compte du Basic Auth et des IPs autorisées)
