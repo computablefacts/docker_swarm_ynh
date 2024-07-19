@@ -33,6 +33,9 @@ ynh_remove_nginx_config
 rm -f /etc/nginx/conf.d/$domain.d/htpasswd
 rm -f /etc/nginx/conf.d/$domain.d/basic_auth.conf
 
+# Remove allowed IPs conf
+rm -f /etc/nginx/conf.d/$domain.d/allowed_ips.conf
+
 ynh_remove_logrotate
 
 # Remove the stack

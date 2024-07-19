@@ -117,6 +117,30 @@ else
     # Ajouter la conf nginx pour utiliser htpasswd avec le Basic Auth
     ynh_add_config --template="nginx.basic_auth.conf" --destination="/etc/nginx/conf.d/$domain.d/basic_auth.conf"
 fi
+
+# Create the conf file with the allowed ips from allowed_ips
+allowed_ips=$(ynh_app_setting_get --app="$app" --key='allowed_ips')
+
+if [[ -z "$allowed_ips" ]]; then
+    # $allowed_ips est vide
+    rm -f /etc/nginx/conf.d/$domain.d/allowed_ips.conf
+else
+    # Créez un nouveau fichier allowed_ips.conf ou vider le fichier existant
+    echo -n '' > /etc/nginx/conf.d/$domain.d/allowed_ips.conf
+
+    # Traiter la chaîne allowed_ips et ajouter chaque IP au fichier allowed_ips.conf
+    IFS=',' read -r -a ips <<< "$allowed_ips"
+    for ip in "${ips[@]}"
+    do
+        # Ajouter l'IP au fichier allowed_ips.conf
+        echo "allow $ip" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
+    done
+
+    # Interdire toutes les autres IPs
+    echo "deny all" | sudo tee -a /etc/nginx/conf.d/$domain.d/allowed_ips.conf > /dev/null
+fi
+
+# Recharger la conf de nginx (prise en compte du Basic Auth et des IPs autorisées)
 ynh_systemd_action --service_name='nginx' --action='reload'
 
 # Create a dedicated systemd config
