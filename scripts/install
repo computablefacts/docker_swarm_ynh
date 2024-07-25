@@ -63,6 +63,10 @@ else
     # Créez un nouveau fichier allowed_ips.conf ou vider le fichier existant
     echo -n '' > /etc/nginx/conf.d/$domain.d/allowed_ips.conf
 
+    # Si allowed_ips et basic_auth sont actifs en même temps, nous voulons qu'un seul des 2 suffise pour accéder à l'application (faire un OU)
+    # Voir https://nginx.org/en/docs/http/ngx_http_core_module.html#satisfy
+    echo -n 'satisfy any;' > /etc/nginx/conf.d/$domain.d/allowed_ips.conf
+
     # Traiter la chaîne allowed_ips et ajouter chaque IP au fichier allowed_ips.conf
     IFS=',' read -r -a ips <<< "$allowed_ips"
     for ip in "${ips[@]}"
