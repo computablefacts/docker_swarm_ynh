@@ -198,13 +198,9 @@ done
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Restart Docker stack..." --weight=1
+ynh_script_progression --message="Reload the systemd service..." --weight=1
 
-/usr/bin/docker stack up --compose-file stack.yaml --detach=false --prune "$app"
-
-ynh_script_progression --message="Starting a systemd service..." --weight=1
-
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app --action="reload" --log_path="/var/log/$app/$app.log"
 
 #=================================================
 # END OF SCRIPT
