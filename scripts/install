@@ -114,8 +114,10 @@ do
         volume_name=${BASH_REMATCH[1]}
         # If no dots, we consider the volume name is a directory
         if [[ "$volume_name" =~ ^([^.]*)$ ]]; then
-            mkdir -p "$data_dir/$volume_name"
-            chown $app:$app "$data_dir/$volume_name"
+            if [ ! -d "$data_dir/$volume_name" ]; then
+                mkdir -p "$data_dir/$volume_name"
+                chown $app:$app "$data_dir/$volume_name"
+            fi
         fi
     else
         echo "Wrong volume directory ($vol). It should be a relative directory eg. ./my_volume"
