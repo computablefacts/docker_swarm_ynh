@@ -76,8 +76,6 @@ ram.runtime = "50M"
 
     [resources.ports]
     # This will pick a random port for reverse-proxying and store it as the $port setting
-    # Add an extra port found in $port_extra
-    extra.exposed=false
 
     [resources.apt]
     # This will automatically install/uninstall the following apt packages
